@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>My Blogging System</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="create.html">Create Post</a></li>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="login.html">Log In</a></li>
+      </ul>
+    </nav>
+  </header>
+<body>
+    <div class="login-container">
+        <h2>Edit Profile</h2>
+        <form action="updateprofile.php" method="post">
+            <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username"><br>
+            </div>
+
+            <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email"><br>
+            </div>
+
+            <div class="form-group">
+            <label for="bio">Bio:</label>
+            <textarea id="bio" name="bio"></textarea><br>
+            </div>
+
+            <!-- Add more profile fields here -->
+
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+    <footer>
+        <p>&copy; 2023 My Blogging System. All rights reserved.</p>
+      </footer>
+</body>
+</html>

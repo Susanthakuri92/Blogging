@@ -1,0 +1,87 @@
+<style>
+profile-main {
+  text-align: center;
+}
+
+.profile-info {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-info h3 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.profile-info p {
+  color: #777;
+  margin-bottom: 5px;
+}
+
+.profile-info p:first-child {
+  margin-top: 0;
+}
+
+.profile-info p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .profile-info {
+    padding: 10px;
+  }
+
+  .profile-info h3 {
+    font-size: 20px;
+    margin-bottom: 5px;
+  }
+}
+</style>
+
+
+profile.php
+<?php
+session_start();
+include 'connect.php';
+
+if (!isset($_SESSION["user_id"])) {
+    // Handle the case if the user is not logged in
+    // You can redirect or display an error message
+    exit("User not logged in.");
+}
+
+$user_id = $_SESSION["user_id"];
+
+// Fetch user details from the database
+$sql = "SELECT * FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows == 1) {
+    $row = $result->fetch_assoc();
+    $username = $row["username"];
+    $email = $row["email"];
+    $bio = $row["bio"];
+} else {
+    // Handle the case if the user is not found
+    // You can redirect or display an error message
+    exit("User not found.");
+}
+
+$stmt->close();
+$conn->close();
+?>
+
+<h3>Username: <?php echo $username; ?></h3>
+<p>Email: <?php echo $email; ?></p>
+<p>Bio: <?php echo $bio; ?></p>
+<div class="form-group">
+    <a href="editprofile.php"><button>Edit</button></a>
+</div>
