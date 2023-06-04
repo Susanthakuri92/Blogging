@@ -24,7 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
 
     if ($stmt->affected_rows == 1) {
-        echo "User registered successfully.";
+        header("Location: login.html");
+        exit;
     } else {
         echo "Error occurred while registering the user.";
     }

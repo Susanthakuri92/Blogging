@@ -35,17 +35,6 @@ profile-main {
 .profile-info p:last-child {
   margin-bottom: 0;
 }
-
-@media (max-width: 600px) {
-  .profile-info {
-    padding: 10px;
-  }
-
-  .profile-info h3 {
-    font-size: 20px;
-    margin-bottom: 5px;
-  }
-}
 </style>
 </head>
 <body>
