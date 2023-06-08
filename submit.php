@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     echo 'document.addEventListener("DOMContentLoaded", function() {';
     echo '  document.body.style.animation = "fadeIn 0.1s ease-in-out";'; // Adjust the animation duration
     echo '  setTimeout(function() {';
-    echo '    window.location.href = "index.html";';
+    echo '    window.location.href = "index.php";';
     echo '  }, 50);'; // Delay for 1 second before redirecting
     echo '});';
     echo '</script>';

@@ -42,7 +42,7 @@ profile-main {
     <h1>My Blogging System</h1>
     <nav>
       <ul>
-        <li><a href="index.html">Home</a></li>
+        <li><a href="index.php">Home</a></li>
         <li><a href="create.html">Create Post</a></li>
         <li><a href="profile.php">Profile</a></li>
         <li><a href="login.html" id="login-link">Log In</a></li>
