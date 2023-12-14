@@ -12,12 +12,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $user_id = $_SESSION["user_id"];
     $username = $_POST["username"];
     $email = $_POST["email"];
-    $bio = $_POST["bio"];
 
     // Update user details in the database
-    $sql = "UPDATE users SET username = ?, email = ?, bio = ? WHERE id = ?";
+    $sql = "UPDATE users SET username = ?, email = ? WHERE id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssi", $username, $email, $bio, $user_id);
+    $stmt->bind_param("sssi", $username, $email, $user_id);
     $stmt->execute();
     $stmt->close();
 

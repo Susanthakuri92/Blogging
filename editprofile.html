@@ -10,7 +10,7 @@
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
-        <li><a href="create.html">Create Post</a></li>
+        <li><a href="create.php">Create Post</a></li>
         <li><a href="profile.php">Profile</a></li>
         <li><a href="login.html">Log In</a></li>
       </ul>
@@ -19,7 +19,7 @@
 <body>
     <div class="login-container">
         <h2>Edit Profile</h2>
-        <form action="updateprofile.php" method="post">
+        <form action="profile.php" method="post">
             <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username"><br>
@@ -30,10 +30,7 @@
             <input type="email" id="email" name="email"><br>
             </div>
 
-            <div class="form-group">
-            <label for="bio">Bio:</label>
-            <textarea id="bio" name="bio"></textarea><br>
-            </div>
+        
 
             <!-- Add more profile fields here -->
 

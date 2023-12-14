@@ -1,102 +1,113 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>My Blogging System - Profile</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <style>
-profile-main {
-  text-align: center;
-}
+    .button-container {
+      display: flex;
+      gap: 10px;
+    }
 
-.profile-info {
-  background-color: #f5f5f5;
-  padding: 20px;
-  border-radius: 5px;
-  margin-top: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    .button {
+      padding: 10px 15px;
+      background-color: rgba(0, 0, 0, 0);
+      /* Transparent black */
+      color: #000;
+      /* Black text */
+      border: 1px solid #000;
+      /* Black border */
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-.profile-info h3 {
-  color: #333;
-  font-size: 24px;
-  margin-bottom: 10px;
-  margin-top: 0;
-}
-
-.profile-info p {
-  color: #777;
-  margin-bottom: 5px;
-}
-
-.profile-info p:first-child {
-  margin-top: 0;
-}
-
-.profile-info p:last-child {
-  margin-bottom: 0;
-}
-</style>
+    .button:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+      /* Semi-transparent black on hover */
+      color: black;
+      /* White text on hover */
+    }
+  </style>
 </head>
+
 <body>
   <header>
     <h1>My Blogging System</h1>
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
-        <li><a href="create.html">Create Post</a></li>
+        <li><a href="create.php">Create Post</a></li>
         <li><a href="profile.php">Profile</a></li>
-        <li><a href="login.html" id="login-link">Log In</a></li>
+        <li><a href="login.php" id="login-link">Log In</a></li>
       </ul>
     </nav>
   </header>
   <main>
     <h2>Profile</h2>
-    <div class="profile-info">
-      <?php
-      session_start();
-      include 'connect.php';
+    <section class="post">
+      <div class="profile-info">
+        <?php
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
 
-      if (!isset($_SESSION["user_id"])) {
+        session_start();
+        include 'connect.php';
+
+        if (!isset($_SESSION["user_id"])) {
           // Handle the case if the user is not logged in
           // You can redirect or display an error message
           exit("User not logged in.");
-      }
+        }
 
-      $user_id = $_SESSION["user_id"];
+        $user_id = $_SESSION["user_id"];
 
-      // Fetch user details from the database
-      $sql = "SELECT * FROM users WHERE id = ?";
-      $stmt = $conn->prepare($sql);
-      $stmt->bind_param("i", $user_id);
-      $stmt->execute();
-      $result = $stmt->get_result();
+        // Fetch user details from the database using a prepared statement
+        $sql = "SELECT * FROM users WHERE user_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
 
-      if ($result->num_rows == 1) {
+        if (!$stmt->execute()) {
+          // Display SQL error if the query execution fails
+          echo "SQL Error: " . $stmt->error;
+          exit; // Exit the script
+        }
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows == 1) {
           $row = $result->fetch_assoc();
           $username = $row["username"];
           $email = $row["email"];
-          $bio = $row["bio"];
 
           // Display the user profile information
           echo '<h3>Username: ' . $username . '</h3>';
           echo '<p>Email: ' . $email . '</p>';
-          echo '<p>Bio: ' . $bio . '</p>';
+
           echo '<div class="form-group">';
-          echo '<a href="editprofile.html"><button>Edit</button></a>';
+          echo '<div class="button-container">';
+          echo '<a href="editprofile.html"><button class="button">Edit</button></a>';
+          echo '<a href="logout.php"><button class="button">Logout</button></a>';
           echo '</div>';
-      } else {
+          echo '</div>';
+
+
+        } else {
           // Handle the case if the user is not found
           // You can redirect or display an error message
           exit("User not found.");
-      }
+        }
 
-      $stmt->close();
-      $conn->close();
-      ?>
-    </div>
+        $stmt->close();
+        $conn->close();
+        ?>
+      </div>
+    </section>
   </main>
   <footer>
     <p>&copy; 2023 My Blogging System. All rights reserved.</p>
   </footer>
 </body>
+
 </html>

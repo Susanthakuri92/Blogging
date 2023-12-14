@@ -1,37 +1,89 @@
-<?php
-session_start();
-include 'connect.php';
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Up</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>My Blogging System</h1>
+    <nav>
+      <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="create.php">Create Post</a></li>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="login.php">Log In</a></li>
+      </ul>
+    </nav>
+  </header>
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST["username"];
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $confirmPassword = $_POST["confirm_password"];
+  <div class="signup-container">
+    <h2>Sign Up</h2>
+    <form action="signup.php" method="POST">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm-password">Confirm Password:</label>
+        <input type="password" id="confirm-password" name="confirm_password" required>
+      </div>
+      <div class="form-group">
+        <button type="submit" name="signup">Sign Up</button>
+      </div>
+    </form>
 
-    // Perform necessary validation checks
-    if ($password !== $confirmPassword) {
-        echo "Passwords do not match.";
-        exit;
-    }
+    <p>Already have an account? <a href="login.html">Log in</a></p>
+  </div>
 
-    // Hash the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+  <footer>
+    <p>&copy; 2023 My Blogging System. All rights reserved.</p>
+  </footer>
+  
+  <?php
+  session_start();
+  include 'connect.php';
 
-    // Perform database query
-    $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $username, $email, $hashed_password);
-    $stmt->execute();
+  if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
+      $username = $_POST["username"];
+      $email = $_POST["email"];
+      $password = $_POST["password"];
+      $confirmPassword = $_POST["confirm_password"];
 
-    if ($stmt->affected_rows == 1) {
-        header("Location: login.html");
-        exit;
-    } else {
-        echo "Error occurred while registering the user.";
-    }
+      // Perform necessary validation checks
+      if ($password !== $confirmPassword) {
+          echo "Passwords do not match.";
+          exit;
+      }
 
-    $stmt->close();
-}
+      // Hash the password
+      $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-$conn->close();
-?>
+      // Perform database query
+      $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+      $stmt = $conn->prepare($sql);
+      $stmt->bind_param("sss", $username, $email, $hashed_password);
+      $stmt->execute();
+
+      if ($stmt->affected_rows == 1) {
+          header("Location: login.php");
+          exit;
+      } else {
+          echo "Error occurred while registering the user.";
+      }
+
+      $stmt->close();
+  }
+
+  $conn->close();
+  ?>
+</body>
+</html>
