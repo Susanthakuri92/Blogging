@@ -91,8 +91,6 @@
           echo '<a href="logout.php"><button class="button">Logout</button></a>';
           echo '</div>';
           echo '</div>';
-
-
         } else {
           // Handle the case if the user is not found
           // You can redirect or display an error message
