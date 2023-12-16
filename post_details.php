@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         .comment-form-container {
-            background-color: #f8f8f8;
+            background-color: #e5e3e3;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 20px;
@@ -20,20 +20,6 @@
         .comment-form-container h3 {
             font-size: 1.2em;
             margin-bottom: 10px;
-        }
-
-        .comment-submit-btn {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .comment-submit-btn:hover {
-            background-color: #0056b3;
         }
 
         .form-group {
@@ -157,17 +143,24 @@
 </head>
 
 <body>
-    <header>
-        <h1>My Blogging System</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="create.php">Create Post</a></li>
-                <li><a href="profile.php">Profile</a></li>
-                <li><a href="login.php">Log In</a></li>
-            </ul>
-        </nav>
-    </header>
+<header>
+<h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
+    <nav>
+      <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="create.php">Create Post</a></li>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="login.php" id="login-link">Log In</a></li>
+      </ul>
+    </nav>
+    <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
+
+    <div class="logout-button" onclick="location.href='logout.php'">
+            <i class="fas fa-arrow-right-from-bracket"></i>
+            Logout
+        </div>
+
+  </header>
     <main>
         <?php
         ob_start();
@@ -290,23 +283,23 @@
 
                 $comments = getComments($postID);
                 if (!empty($comments)) {
-                    echo "<div class='comments-container'>";
+                    echo "<div class='comment-form-container'>";
                     echo "<h3>Comments</h3>";
                     echo "<ul>";
                     foreach ($comments as $comment) {
+                        // Avoid escaping the username, only escape the comment text
+                        $commentText = escape($comment['comment_text']);
+                        $userName = $comment['user_name'];
                         echo "<li>" . escape("{$comment['user_name']}: {$comment['comment_text']}") . "</li>";
                     }
                     echo "</ul>";
-                    echo "</div>";
                 }
 
-                echo "<div class='comment-form-container'>";
-                echo "<h3>Add a Comment</h3>";
                 echo "<form action='' method='post'>";
                 echo "<input type='hidden' name='postID' value='$postID'>";
 
                 echo "<div class='form-group'>";
-                echo "<label for='comment'>Your Comment:</label>";
+                echo "<label for='comment'>Add a Comment:</label>";
                 echo "<textarea id='comment' name='comment' required></textarea>";
                 echo "</div>";
 

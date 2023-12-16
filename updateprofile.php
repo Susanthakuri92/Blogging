@@ -14,11 +14,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
 
     // Update user details in the database
-    $sql = "UPDATE users SET username = ?, email = ? WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssi", $username, $email, $user_id);
-    $stmt->execute();
-    $stmt->close();
+    $sql = "UPDATE users SET username = ?, email = ? WHERE user_id = ?";
+    
+    // Use a try-catch block for better error handling
+    try {
+        $stmt = $conn->prepare($sql);
+        
+        if (!$stmt) {
+            throw new Exception("Error in preparing statement: " . $conn->error);
+        }
+
+        $stmt->bind_param("ssi", $username, $email, $user_id);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Error executing statement: " . $stmt->error);
+        }
+
+        $stmt->close();
+    } catch (Exception $e) {
+        // Handle exceptions, log errors, or display a user-friendly message
+        exit("Error updating user profile: " . $e->getMessage());
+    }
 
     // Redirect to the profile.php page
     header("Location: profile.php");

@@ -47,7 +47,9 @@
   margin: 20px auto;
   margin-top: 20px;
 }
-
+main a{
+  text-decoration: none;
+}
 .post {
     width: 500px; /* Adjust the width and margin as needed */
     height: 570px;
@@ -86,7 +88,7 @@
 
 <body>
   <header>
-    <h1>My Blogging System</h1>
+    <h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
@@ -95,12 +97,27 @@
         <li><a href="login.php" id="login-link">Log In</a></li>
       </ul>
     </nav>
+    <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
+
+    <div class="logout-button" onclick="location.href='logout.php'">
+            <i class="fas fa-arrow-right-from-bracket"></i>
+            Logout
+        </div>
+
   </header>
 
   <main>
   <?php
+  session_start(); // Start the session
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
+// Check if the user is not logged in
+if (!isset($_SESSION["user_id"])) {
+  // Redirect to the login page
+  header("Location: login.php");
+  exit;
+}
 
 // Include the database connection file
 include 'connect.php';

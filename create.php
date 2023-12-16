@@ -92,6 +92,8 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Blogging System - Create Post</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         form {
             margin-top: 20px;
@@ -109,7 +111,7 @@ $conn->close();
 
         textarea,
         input[type="file"] {
-            width: 100%;
+            width: 99%;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 3px;
@@ -128,17 +130,24 @@ $conn->close();
 </head>
 
 <body>
-    <header>
-        <h1>My Blogging System</h1>
-        <nav>
-            <ul>
-                <li><a href="index.php">Home</a></li>
-                <li><a href="create.php">Create Post</a></li>
-                <li><a href="profile.php">Profile</a></li>
-                <li><a href="login.php" id="login-link">Log In</a></li>
-            </ul>
-        </nav>
-    </header>
+<header>
+<h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
+    <nav>
+      <ul>
+        <li><a href="index.php">Home</a></li>
+        <li><a href="create.php">Create Post</a></li>
+        <li><a href="profile.php">Profile</a></li>
+        <li><a href="login.php" id="login-link">Log In</a></li>
+      </ul>
+    </nav>
+    <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
+
+    <div class="logout-button" onclick="location.href='logout.php'">
+            <i class="fas fa-arrow-right-from-bracket"></i>
+            Logout
+        </div>
+
+  </header>
     <main>
         <section class="post">
             <h2>Create Post</h2>

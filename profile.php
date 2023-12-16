@@ -4,6 +4,8 @@
 <head>
   <title>My Blogging System - Profile</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
   <style>
     .button-container {
       display: flex;
@@ -33,8 +35,8 @@
 </head>
 
 <body>
-  <header>
-    <h1>My Blogging System</h1>
+<header>
+<h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
@@ -43,6 +45,13 @@
         <li><a href="login.php" id="login-link">Log In</a></li>
       </ul>
     </nav>
+    <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
+
+    <div class="logout-button" onclick="location.href='logout.php'">
+            <i class="fas fa-arrow-right-from-bracket"></i>
+            Logout
+        </div>
+
   </header>
   <main>
     <h2>Profile</h2>

@@ -7,7 +7,7 @@ include 'connect.php';
 function getComments($postID)
 {
     global $conn;
-    $sql = "SELECT * FROM comments WHERE post_id = ? ORDER BY comment_date ASC";
+    $sql = "SELECT comments.*, users.username AS user_name FROM comments JOIN users ON comments.user_id = users.user_id WHERE post_id = ? ORDER BY comment_date ASC";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $postID);
     $stmt->execute();
@@ -15,24 +15,26 @@ function getComments($postID)
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
-function addComment($postID, $username, $commentText)
+
+function addComment($postID, $userID, $commentText)
 {
     global $conn;
-    $sql = "INSERT INTO comments (post_id, user_name, comment_text) VALUES (?, ?, ?)";
+    $sql = "INSERT INTO comments (post_id, user_id, comment_text) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iss", $postID, $username, $commentText);
+    $stmt->bind_param("iis", $postID, $userID, $commentText);
     return $stmt->execute();
 }
+
 
 if (isset($_POST['submitComment'])) {
     $postID = $_POST['postID'];
     $commentText = trim($_POST['comment']);
 
     if (!empty($commentText)) {
-        // Replace the following line with your authentication logic to get the username
-        $username = "TestUser";
+        // Replace the following line with your authentication logic to get the user ID
+        $userID = 1; // Replace with actual user ID
 
-        $success = addComment($postID, $username, $commentText);
+        $success = addComment($postID, $userID, $commentText);
 
         if ($success) {
             header("Location: post_details.php?post_id=$postID");
@@ -46,5 +48,6 @@ if (isset($_POST['submitComment'])) {
         echo "<p>Please enter a comment.</p>";
     }
 }
+
 ob_end_flush();
 ?>
