@@ -1,4 +1,5 @@
 <?php
+ob_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 include 'connect.php';
@@ -26,7 +27,8 @@ if (isset($_POST['submitComment'])) {
     $commentText = trim($_POST['comment']);
 
     if (!empty($commentText)) {
-        $username = "TestUser"; // Replace with your authentication logic to get the username
+        // Replace the following line with your authentication logic to get the username
+        $username = "TestUser";
 
         $success = addComment($postID, $username, $commentText);
 
@@ -34,10 +36,13 @@ if (isset($_POST['submitComment'])) {
             header("Location: post_details.php?post_id=$postID");
             exit;
         } else {
-            echo "<p>Error adding comment. Please try again.</p>";
+            // Provide a user-friendly error message
+            echo "<p>Failed to add comment. Please try again later.</p>";
         }
     } else {
+        // Provide a user-friendly error message
         echo "<p>Please enter a comment.</p>";
     }
 }
+ob_end_flush();
 ?>
