@@ -4,7 +4,8 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 include 'connect.php';
 
-function getComments($postID) {
+function getComments($postID)
+{
     global $conn;
     $sql = "SELECT * FROM comments WHERE post_id = ? ORDER BY comment_date ASC";
     $stmt = $conn->prepare($sql);
@@ -14,7 +15,8 @@ function getComments($postID) {
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
-function addComment($postID, $username, $commentText) {
+function addComment($postID, $username, $commentText)
+{
     global $conn;
     $sql = "INSERT INTO comments (post_id, user_name, comment_text) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
