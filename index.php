@@ -43,18 +43,42 @@
     main {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  margin: 5px auto;
+  justify-content: flex-start;
+  margin: 20px auto;
+  margin-top: 20px;
 }
 
 .post {
-  width: calc(35% - 20px); /* Adjust width as needed */
-  box-sizing: border-box;
-  margin-bottom: 5px; /* Adjust margin as needed */
-  padding: 1px; /* Adjust padding as needed */
-  border: 1px solid #ddd; /* Add border for better visibility */
-  border-radius: 8px; /* Add border-radius for rounded corners */
-  background-color: #fff; /* Add background color */
+    width: 500px; /* Adjust the width and margin as needed */
+    height: 570px;
+    margin: 20px auto;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+}
+
+/* For larger screens, show 3 posts in a row */
+@media screen and (min-width: 768px) {
+  main {
+    justify-content: space-evenly;
+    margin: 10px auto;
+    padding: 0 40px;
+  }
+
+  .post {
+    width: calc(32% - 20px); /* Adjust the width and margin as needed */
+    margin: 20px 0;
+  }
+}
+
+/* For smaller screens, show 1 post in a row */
+@media screen and (max-width: 767px) {
+  .post {
+    width: calc(100% - 20px);
+    margin: 20px 0;
+  }
 }
 
   </style>
@@ -82,114 +106,35 @@ error_reporting(E_ALL);
 include 'connect.php';
 include 'comments.php'; // Make sure you have this file with necessary functions
 
-// Check if the Love button is clicked
+
+// Handle Love Count Update
 if (isset($_GET['love'])) {
-    $postID = $_GET['love'];
+  $lovePostID = $_GET['love'];
 
-    // Increment the love_count for the post
-    $sql = "UPDATE posts SET love_count = love_count + 1 WHERE post_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $postID);
-    $stmt->execute();
+  // Validate user permissions or any other checks before updating love count
+  // Use prepared statement to avoid SQL injection
+  $sqlUpdateLove = "UPDATE posts SET love_count = love_count + 1 WHERE post_id = ?";
+  $stmtUpdateLove = $conn->prepare($sqlUpdateLove);
+  $stmtUpdateLove->bind_param("i", $lovePostID);
 
-    // Check if the update was successful
-    if ($stmt->affected_rows > 0) {
-        // Redirect back to the page to update the love count
-        header("Location: index.php");
-        exit;
-    }
+  if ($stmtUpdateLove->execute()) {
+      // Redirect back to the same page to update love count
+      header("Location: {$_SERVER['PHP_SELF']}");
+      exit();
+  } else {
+      echo "Error updating love count: " . $stmtUpdateLove->error;
+  }
+
+  $stmtUpdateLove->close();
 }
-
-// Check if the post ID is provided for deletion
-if (isset($_GET['delete'])) {
-    $postID = $_GET['delete'];
-
-    // Delete the post from the database
-    $sql = "DELETE FROM posts WHERE post_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $postID);
-    $stmt->execute();
-
-    // Check if the deletion was successful
-    if ($stmt->affected_rows > 0) {
-        echo "Post deleted successfully.";
-    } else {
-        echo "Error deleting post.";
-    }
-
-    // Close the statement
-    $stmt->close();
-}
-
-// Check if the post ID is provided for editing
-if (isset($_GET['edit'])) {
-    $postID = $_GET['edit'];
-
-    // Fetch the post from the database
-    $sql = "SELECT * FROM posts WHERE post_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $postID);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Check if the post exists
-    if ($result->num_rows > 0) {
-        // Display the edit form
-        $row = $result->fetch_assoc();
-        $content = $row['content'];
-
-        echo "<h2>Edit Post</h2>";
-        echo "<section class='post'>";
-        // Display the edit form with pre-filled values
-        echo "<form action='' method='post'>";
-        echo "<input type='hidden' name='post_id' value='$postID'>";
-        echo "<label>Content:</label><br>";
-        echo "<textarea name='content'>$content</textarea><br>";
-        echo "<div class='button-container'>";
-        echo "<input type='submit' name='edit_post' value='Save' class='action-button'>";
-        echo "</div>";
-        echo "</form>";
-    } else {
-        echo "Post not found.";
-    }
-    echo "</section>";
-
-    // Close the statement
-    $stmt->close();
-}
-
-// Check if the form is submitted for editing a post
-if (isset($_POST['edit_post'])) {
-    $postID = $_POST['post_id'];
-    $content = $_POST['content'];
-
-    // Update the post in the database
-    $sql = "UPDATE posts SET  content = ? WHERE post_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $content, $postID);
-
-    // Execute the statement
-    if ($stmt->execute()) {
-        // Check if any rows were affected
-        if ($stmt->affected_rows > 0) {
-            echo "Post updated successfully.";
-        } else {
-            echo "No changes were made to the post.";
-        }
-    } else {
-        // Display an error message
-        echo "Error updating post: " . $stmt->error;
-    }
-
-    // Close the statement
-    $stmt->close();
-}
-
 // Fetch posts from the database with the associated username
 $sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id ORDER BY posts.post_date DESC";
 $result = $conn->query($sql);
 
-if ($result->num_rows > 0) {
+
+if ($result === false) {
+    echo "Error: " . $conn->error;
+} elseif ($result->num_rows > 0) {
     // Loop through each post
     while ($row = $result->fetch_assoc()) {
         $postID = $row['post_id'];
@@ -199,15 +144,11 @@ if ($result->num_rows > 0) {
         $loveCount = $row['love_count'];
 
         // Display post content
+                echo "<a href='post_details.php?post_id=$postID' class='post-link'>";
+
         echo "<section class='post'>";
         echo "<div class='post-header'>";
         echo "<h2 class='username'>$username</h2>"; // Display username
-        // Display delete and edit buttons
-        // echo "<div class='button-container'>";
-        // echo "<button onclick=\"confirmDelete($postID)\" class='action-button'>Delete</button>";
-        // echo "<button onclick=\"editPost($postID)\" class='action-button'>Edit</button>";
-        // echo "</div>";
-
         echo "</div>"; // Close the post-header div
 
         echo "<p class='meta'>Posted on $postDate</p>";
@@ -216,47 +157,18 @@ if ($result->num_rows > 0) {
 
         // Display the image if it exists
         if (!empty($row['image_path'])) {
-            echo "<img src='" . htmlspecialchars($row['image_path']) . "' alt='Post Image' style='max-width: 100%; display:block; margin:0 auto;'>";
-        }
-
-        // Display the Love button and love count to the right of content
-        echo "<div class='love-section' style='display: flex; align-items: center;'>";
-        echo "<a href='?love=$postID' class='love-button'><i class='fa-regular fa-heart'></i></a>";
-        echo "<span class='love-count'>$loveCount</span>";
-        echo "</div>";
-
-        echo "</div>"; // Close the post-content div
-
-        // Display the comments container initially hidden
-        echo "<div id='comments-container-$postID' class='comments-container' style='display: none;'>";
-
-        // Display the comment toggle button
-echo "<button class='action-button' id='toggle-comments-$postID' onclick=\"toggleComments($postID)\">Toggle Comments</button>";
-
-        // Display comments
-        $comments = getComments($postID);
-        if (!empty($comments)) {
-            echo "<div class='comments-section'>";
-            echo "<h3>Comments:</h3>";
-            echo "<ul>";
-            foreach ($comments as $comment) {
-                echo "<li>{$comment['user_name']}: {$comment['comment_text']}</li>";
-            }
-            echo "</ul>";
+            echo "<div style='width: 100%; height: 400px; overflow: hidden;'>";
+            echo "<img src='" . htmlspecialchars($row['image_path']) . "' alt='Post Image' class='fill-container'>";
             echo "</div>";
         }
 
-        // Display the comment form
-        echo "<div class='comment-form'>";
-        echo "<form action='' method='post'>";
-        echo "<input type='hidden' name='post_id' value='$postID'>";
-        echo "<label>Your Comment:</label><br>";
-        echo "<textarea name='comment_text'></textarea><br>";
-        echo "<input type='submit' name='submit_comment' value='Submit Comment'>";
-        echo "</form>";
-        echo "</div>";
+        // Display the Love button and love count to the right of content
+echo "<div class='love-section' style='display: flex; align-items: center;'>";
+echo "<a href='javascript:void(0);' onclick='updateLoveCount($postID)' class='love-button'><i class='fa-regular fa-heart'></i></a>";
+echo "<span class='love-count' id='love-count-$postID'>$loveCount</span>";
+echo "</div>";
 
-        echo "</div>"; // Close the comments container
+        echo "</div>"; // Close the post-content div
 
         echo "</section>"; // Close the section
     }
@@ -264,56 +176,20 @@ echo "<button class='action-button' id='toggle-comments-$postID' onclick=\"toggl
     echo "No posts found.";
 }
 
-// Process the submitted comment
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_comment'])) {
-    $postID = $_POST['post_id'];
-    $username = 'JohnDoe'; // Replace with the actual username (you may get it from the session)
-    $commentText = $_POST['comment_text'];
-
-    if (addComment($postID, $username, $commentText)) {
-        // You can display a success message here if needed
-    } else {
-        echo "Error adding comment.";
-    }
-}
-
 // Close the database connection
 $conn->close();
-
 ?>
 
-  </main>
-  <script>
-    function toggleComments(postID) {
-      const commentsContainer = document.getElementById(`comments-container-${postID}`);
-      const toggleButton = document.getElementById(`toggle-comments-${postID}`);
-
-      if (commentsContainer.style.display === 'none' || commentsContainer.style.display === '') {
-        commentsContainer.style.display = 'block';
-        toggleButton.innerText = 'Hide Comments';
-      } else {
-        commentsContainer.style.display = 'none';
-        toggleButton.innerText = 'Toggle Comments';
-      }
-    }
-
-    function confirmDelete(postID) {
-      if (confirm("Are you sure you want to delete this post?")) {
-        window.location.href = `?delete=${postID}`;
-      }
-    }
-
-    function editPost(postID) {
-      window.location.href = `?edit=${postID}`;
-    }
-
-    function savePost(postID) {
-      window.location.reload();
-    }
-  </script>
+    </main>
+  
   <footer>
     <p>&copy; 2023 My Blogging System. All rights reserved.</p>
   </footer>
+  <script>
+    function updateLoveCount(postID) {
+    window.location.href = '?love=' + postID;
+}
+  </script>
 </body>
 
 </html>

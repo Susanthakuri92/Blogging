@@ -70,8 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 die("Error saving post.");
             }
 
-            // Close the statement
-            $stmt->close();
+            
+            
         } else {
             // Print detailed error information
             die("Sorry, there was an error uploading your file.<br>Error details: " . $_FILES["image"]["error"]);
@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Close the database connection
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
