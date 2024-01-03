@@ -11,15 +11,18 @@
     <style>
         .comment-form-container {
             background-color: #e5e3e3;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
+            border-radius: 18px;
+            padding: 10px;
+            margin-top: 10px;
         }
 
         .comment-form-container h3 {
             font-size: 1.2em;
             margin-bottom: 10px;
+        }
+
+        .comment-container {
+            display: flex;
         }
 
         .form-group {
@@ -129,9 +132,6 @@
             /* Maintain aspect ratio and cover the container */
         }
 
-
-
-
         /* Responsive styles */
         @media (min-width: 768px) {
             section.post {
@@ -143,27 +143,26 @@
 </head>
 
 <body>
-<header>
-<h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
-    <nav>
-      <ul>
-        <li><a href="index.php">Home</a></li>
-        <li><a href="create.php">Create Post</a></li>
-        <li><a href="profile.php">Profile</a></li>
-        <li><a href="login.php" id="login-link">Log In</a></li>
-      </ul>
-    </nav>
-    <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
+    <header>
+        <h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
+        <nav>
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="create.php">Create Post</a></li>
+                <li><a href="profile.php">Profile</a></li>
+                <li><a href="login.php" id="login-link">Log In</a></li>
+            </ul>
+        </nav>
+        <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
 
-    <div class="logout-button" onclick="location.href='logout.php'">
+        <div class="logout-button" onclick="location.href='logout.php'">
             <i class="fas fa-arrow-right-from-bracket"></i>
             Logout
         </div>
 
-  </header>
+    </header>
     <main>
         <?php
-        ob_start();
         ini_set('display_errors', 1);
         error_reporting(E_ALL);
         include 'connect.php';
@@ -172,6 +171,30 @@
         function escape($str)
         {
             return htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+        }
+
+        function confirmDeleteScript($postID)
+        {
+            return "if (confirm('Are you sure you want to delete this post?')) { window.location.href = `post_details.php?post_id={$postID}&delete={$postID}`; }";
+        }
+
+        function handleCommentSubmitScript($postID)
+        {
+            return "window.location.href = `post_details.php?post_id={$postID}`;";
+        }
+
+        function handleActionScript($action, $postID)
+        {
+            if ($action === 'delete') {
+                return confirmDeleteScript($postID);
+            } elseif ($action === 'love') {
+                return "window.location.href = `post_details.php?post_id={$postID}&love={$postID}`;";
+            }
+        }
+
+        function showEditFormScript($postID)
+        {
+            return "window.location.href = `post_details.php?edit={$postID}`;";
         }
 
         // Check if the delete parameter is set
@@ -199,10 +222,9 @@
                     if (!empty($imagePathToDelete) && file_exists($imagePathToDelete)) {
                         unlink($imagePathToDelete);
                     }
-
                     // Redirect back to the post listing after deletion
-                    header('Location: index.php');
-                    exit();
+                    echo "<script>window.location.href = 'index.php';</script>";
+                    die();
                 } else {
                     echo "Error deleting post: " . $stmtDelete->error;
                 }
@@ -231,15 +253,14 @@
 
                 if ($stmtUpdateLove->execute()) {
                     // Redirect back to the post details page
-                    header("Location: post_details.php?post_id=$postID");
-                    exit();
+                    echo "<script>window.location.href = 'post_details.php?post_id={$postID}';</script>";
+                    die();
                 } else {
                     echo "Error updating love count: " . $stmtUpdateLove->error;
                 }
 
                 $stmtUpdateLove->close();
             }
-
 
             // Fetch the post from the database
             $sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id WHERE post_id = ?";
@@ -261,8 +282,8 @@
                 echo "<h2 class='username'>$username</h2>";
 
                 echo "<div class='button-container'>";
-                echo "<button onclick=\"confirmDelete($postID)\" class='action-button'>Delete</button>";
-                echo "<button onclick=\"showEditForm($postID)\" class='action-button'>Edit</button>";
+                echo "<button onclick=\"" . confirmDeleteScript($postID) . "\" class='action-button'>Delete</button>";
+                echo "<button onclick=\"" . showEditFormScript($postID) . "\" class='action-button'>Edit</button>";
 
                 echo "</div>";
 
@@ -277,39 +298,35 @@
                 }
 
                 echo "<div class='love-section' style='display: flex; align-items: center;'>";
-                echo "<a href='post_details.php?post_id=$postID&love=$postID' class='love-button'><i class='fa-regular fa-heart'></i></a>";
+                echo "<a href='post_details.php?post_id={$postID}&love={$postID}' class='love-button'><i class='fa-regular fa-heart'></i></a>";
                 echo "<span class='love-count'>$loveCount</span>";
                 echo "</div>";
 
-                $comments = getComments($postID);
+                $comments = getComments($postID); // Assuming this function fetches comments
+        
                 if (!empty($comments)) {
                     echo "<div class='comment-form-container'>";
                     echo "<h3>Comments</h3>";
-                    echo "<ul>";
                     foreach ($comments as $comment) {
-                        // Avoid escaping the username, only escape the comment text
-                        $commentText = escape($comment['comment_text']);
-                        $userName = $comment['user_name'];
-                        echo "<li>" . escape("{$comment['user_name']}: {$comment['comment_text']}") . "</li>";
+                        echo "<div class='comment-container'>";
+                        echo "<p class='comment-user'>{$comment['user_name']}: </p>";
+                        echo "<p class='comment-text'>{$comment['comment_text']}</p>";
+                        echo "</div>";
                     }
-                    echo "</ul>";
+                    echo "</div>";
                 }
 
-                echo "<form action='' method='post'>";
-                echo "<input type='hidden' name='postID' value='$postID'>";
-
+                echo "<form action='comments.php' method='post' onsubmit=\"" . handleCommentSubmitScript($postID) . "\">";
+                echo "<input type='hidden' name='postID' value='{$postID}'>";
                 echo "<div class='form-group'>";
                 echo "<label for='comment'>Add a Comment:</label>";
                 echo "<textarea id='comment' name='comment' required></textarea>";
                 echo "</div>";
-
                 echo "<div class='form-group'>";
                 echo "<button type='submit' name='submitComment' class='comment-submit-btn'>Submit Comment</button>";
                 echo "</div>";
-
                 echo "</form>";
                 echo "</div>";
-
 
                 echo "</section>";
 
@@ -341,9 +358,9 @@
 
                 // Display the edit form with pre-filled values
                 echo "<form action='' method='post' enctype='multipart/form-data'>";
-                echo "<input type='hidden' name='post_id' value='$postID'>";
+                echo "<input type='hidden' name='post_id' value='{$postID}'>";
                 echo "<label>Content:</label><br>";
-                echo "<textarea name='content'>$content</textarea><br>";
+                echo "<textarea name='content'>{$content}</textarea><br>";
 
                 // Display the current image
                 if (!empty($row['image_path'])) {
@@ -373,30 +390,54 @@
             $postID = $_POST['post_id'];
             $content = $_POST['content'];
 
-            // Handle image upload
-            $newImagePath = handleImageUpload($postID);
-
             // Update the post in the database
             $sql = "UPDATE posts SET content = ?, image_path = ? WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssi", $content, $newImagePath, $postID);
+
+            // Check if a new image is uploaded
+            $newImagePath = handleImageUpload($postID);
+
+            // Always bind both parameters but adjust SQL query accordingly
+            if (!empty($newImagePath)) {
+                // If a new image is uploaded
+                $stmt->bind_param("ssi", $content, $newImagePath, $postID);
+            } else {
+                // If no new image, bind parameters without image path
+                // Fetch the existing image path from the database
+                $sqlImagePath = "SELECT image_path FROM posts WHERE post_id = ?";
+                $stmtImagePath = $conn->prepare($sqlImagePath);
+                $stmtImagePath->bind_param("i", $postID);
+                $stmtImagePath->execute();
+                $resultImagePath = $stmtImagePath->get_result();
+
+                if ($resultImagePath->num_rows > 0) {
+                    $rowImagePath = $resultImagePath->fetch_assoc();
+                    $existingImagePath = $rowImagePath['image_path'];
+
+                    // Bind parameters without image path
+                    $stmt->bind_param("ssi", $content, $existingImagePath, $postID);
+                } else {
+                    echo "Error fetching existing image path.";
+                    exit();
+                }
+
+                $stmtImagePath->close();
+            }
 
             // Execute the statement
             if ($stmt->execute()) {
-                // Check if any rows were affected
-                if ($stmt->affected_rows > 0) {
-                    echo "Post updated successfully.";
-                } else {
-                    echo "No changes were made to the post.";
-                }
+                // Redirect back to the post details page
+                echo "<script>window.location.href = 'post_details.php?post_id={$postID}';</script>";
+                die();
             } else {
-                // Display an error message
                 echo "Error updating post: " . $stmt->error;
             }
 
             // Close the statement
             $stmt->close();
         }
+
+
 
         // Close the database connection
         $conn->close();
@@ -409,16 +450,10 @@
             $uploadOk = 1;
             $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-            // Check if the image file is a actual image or fake image
-            if (isset($_POST["submit"])) {
-                $check = getimagesize($_FILES["new_image"]["tmp_name"]);
-                if ($check !== false) {
-                    echo "File is an image - " . $check["mime"] . ".";
-                    $uploadOk = 1;
-                } else {
-                    echo "File is not an image.";
-                    $uploadOk = 0;
-                }
+            // Check if a file is selected for upload
+            if (empty($_FILES["new_image"]["tmp_name"])) {
+                echo "No new image selected. ";
+                return "";
             }
 
             // Check file size
@@ -427,20 +462,11 @@
                 $uploadOk = 0;
             }
 
-            // Allow certain file formats
-            if (
-                $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-                && $imageFileType != "gif"
-            ) {
-                echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed. Your file has an extension of $imageFileType.";
-                $uploadOk = 0;
-            }
-
             // Check if $uploadOk is set to 0 by an error
             if ($uploadOk == 0) {
                 echo "Sorry, your file was not uploaded.";
             } else {
-                // if everything is ok, try to upload file
+                // If everything is ok, try to upload the file
                 if (move_uploaded_file($_FILES["new_image"]["tmp_name"], $targetFile)) {
                     echo "The file " . basename($_FILES["new_image"]["name"]) . " has been uploaded.";
                     return $targetFile;
@@ -450,7 +476,6 @@
                 }
             }
         }
-        ob_end_flush();
         ?>
     </main>
     <footer>
@@ -463,10 +488,29 @@
             }
         }
 
+        function handleCommentSubmit(postID) {
+            // Implement your logic for handling comment submission here if needed
+            // Redirect to the current page after form submission
+            window.location.href = `post_details.php?post_id=${postID}`;
+            return true; // Prevent form submission (you can remove this line if you want the form to submit)
+        }
+
+        function handleAction(action, postID) {
+            if (action === 'delete') {
+                if (confirm("Are you sure you want to delete this post?")) {
+                    window.location.href = `post_details.php?post_id=${postID}&delete=${postID}`;
+                }
+            } else if (action === 'love') {
+                window.location.href = `post_details.php?post_id=${postID}&love=${postID}`;
+            }
+        }
+
         function showEditForm(postID) {
             window.location.href = `post_details.php?edit=${postID}`;
         }
     </script>
+
+
 </body>
 
 </html>

@@ -1,5 +1,4 @@
 <?php
-ob_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 include 'connect.php';
@@ -14,8 +13,7 @@ function getComments($postID)
     $result = $stmt->get_result();
     return $result->fetch_all(MYSQLI_ASSOC);
 }
-
-
+  
 function addComment($postID, $userID, $commentText)
 {
     global $conn;
@@ -24,7 +22,6 @@ function addComment($postID, $userID, $commentText)
     $stmt->bind_param("iis", $postID, $userID, $commentText);
     return $stmt->execute();
 }
-
 
 if (isset($_POST['submitComment'])) {
     $postID = $_POST['postID'];
@@ -48,6 +45,4 @@ if (isset($_POST['submitComment'])) {
         echo "<p>Please enter a comment.</p>";
     }
 }
-
-ob_end_flush();
 ?>
