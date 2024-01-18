@@ -13,7 +13,7 @@ function getComments($postID)
     $result = $stmt->get_result();
     return $result->fetch_all(MYSQLI_ASSOC);
 }
-  
+
 function addComment($postID, $userID, $commentText)
 {
     global $conn;
@@ -28,8 +28,15 @@ if (isset($_POST['submitComment'])) {
     $commentText = trim($_POST['comment']);
 
     if (!empty($commentText)) {
-        // Replace the following line with your authentication logic to get the user ID
-        $userID = 1; // Replace with actual user ID
+        // Replace the following lines with your authentication logic to get the user ID
+        session_start();
+        if (isset($_SESSION['user_id'])) {
+            $userID = $_SESSION['user_id'];
+        } else {
+            // Redirect to the login page if the user is not authenticated
+            header("Location: login.php");
+            exit;
+        }
 
         $success = addComment($postID, $userID, $commentText);
 

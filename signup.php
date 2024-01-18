@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Sign Up</title>
-  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link rel="stylesheet" type="text/css" href="css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 </head>
@@ -13,8 +13,42 @@
       <ul>
         <li><a href="index.php">Home</a></li>
         <li><a href="create.php">Create Post</a></li>
-        <li><a href="profile.php">Profile</a></li>
-        <li><a href="login.php" id="login-link">Log In</a></li>
+        <!-- <li><a href="profile.php">Profile</a></li>
+        <li><a href="login.php" id="login-link">Log In</a></li> -->
+        <?php
+        session_start();
+        if (isset($_SESSION["user_id"])) {
+          // Assuming you have the $profile_image variable available
+          // Initialize $profile_image based on the user's data from the database
+          include 'connect.php';
+
+          $user_id = $_SESSION["user_id"];
+          $sql = "SELECT profile_image FROM users WHERE user_id = ?";
+          $stmt = $conn->prepare($sql);
+          $stmt->bind_param("i", $user_id);
+
+          if (!$stmt->execute()) {
+            echo "SQL Error: " . $stmt->error;
+            exit;
+          }
+
+          $result = $stmt->get_result();
+
+          if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $profile_image = $row["profile_image"];
+          }
+
+          $stmt->close();
+          $conn->close();
+
+          // Display profile image if available, otherwise use a default image
+          echo '<li><a href="profile.php"><img src="' . (isset($profile_image) ? $profile_image : 'uploads/default_profile.jpg') . '" alt="Profile Image" class="profile-image-nav"></a></li>';
+        } else {
+          // Display login link if the user is not logged in
+          echo '<li><a href="login.php" id="login-link">Log In</a></li>';
+        }
+        ?>
       </ul>
     </nav>
     <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>

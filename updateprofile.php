@@ -43,4 +43,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Handle the case if the request method is not POST
     exit("Invalid request.");
 }
-?>

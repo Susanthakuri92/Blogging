@@ -5,141 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post Details</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <!-- Add the Font Awesome CSS link -->
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" href="css/post_details.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        .comment-form-container {
-            background-color: #e5e3e3;
-            border-radius: 18px;
-            padding: 10px;
-            margin-top: 10px;
-        }
-
-        .comment-form-container h3 {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-
-        .comment-container {
-            display: flex;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        form {
-            margin-top: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        textarea,
-        input[type="file"] {
-            width: 100%;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            margin-bottom: 10px;
-        }
-
-        button[type="submit"] {
-            padding: 8px 15px;
-            background-color: #333;
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .user-info-container {
-            display: flex;
-            align-items: center;
-            /* Align items vertically */
-        }
-
-        .username {
-            margin: 0;
-        }
-
-        .button-container {
-            margin-left: auto;
-            /* Push the button container to the right */
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-button {
-            padding: 10px 15px;
-            background-color: rgba(0, 0, 0, 0);
-            /* Transparent black */
-            color: #000;
-            /* Black text */
-            border: 1px solid #000;
-            /* Black border */
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .action-button:hover {
-            background-color: rgba(0, 0, 0, 0.2);
-            /* Semi-transparent black on hover */
-            color: black;
-            /* White text on hover */
-        }
-
-        section.post {
-            background-color: #f8f6f6;
-            padding: 9px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            border-radius: 5px;
-            margin: 20px auto;
-            /* Center the post container horizontally */
-            position: relative !important;
-            width: auto;
-            max-width: 100%;
-            /* Allow the post box to be as wide as the viewport */
-        }
-
-        .post-content {
-            margin-bottom: 10px;
-            /* Add some space between content and image */
-        }
-
-        .fill-container {
-            width: 100%;
-            height: 600px;
-            /* Set a fixed height for the container */
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .fill-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Maintain aspect ratio and cover the container */
-        }
-
-        /* Responsive styles */
-        @media (min-width: 768px) {
-            section.post {
-                min-width: 300px;
-                /* Adjust this value based on your design */
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -149,8 +17,42 @@
             <ul>
                 <li><a href="index.php">Home</a></li>
                 <li><a href="create.php">Create Post</a></li>
-                <li><a href="profile.php">Profile</a></li>
-                <li><a href="login.php" id="login-link">Log In</a></li>
+                <!-- <li><a href="profile.php">Profile</a></li>
+                <li><a href="login.php" id="login-link">Log In</a></li> -->
+                <?php
+        session_start();
+        if (isset($_SESSION["user_id"])) {
+          // Assuming you have the $profile_image variable available
+          // Initialize $profile_image based on the user's data from the database
+          include 'connect.php';
+
+          $user_id = $_SESSION["user_id"];
+          $sql = "SELECT profile_image FROM users WHERE user_id = ?";
+          $stmt = $conn->prepare($sql);
+          $stmt->bind_param("i", $user_id);
+
+          if (!$stmt->execute()) {
+            echo "SQL Error: " . $stmt->error;
+            exit;
+          }
+
+          $result = $stmt->get_result();
+
+          if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            $profile_image = $row["profile_image"];
+          }
+
+          $stmt->close();
+          $conn->close();
+
+          // Display profile image if available, otherwise use a default image
+          echo '<li><a href="profile.php"><img src="' . (isset($profile_image) ? $profile_image : 'uploads/default_profile.jpg') . '" alt="Profile Image" class="profile-image-nav"></a></li>';
+        } else {
+          // Display login link if the user is not logged in
+          echo '<li><a href="login.php" id="login-link">Log In</a></li>';
+        }
+        ?>
             </ul>
         </nav>
         <span class="separator"><i class="fa-solid fa-grip-lines-vertical"></i></span>
@@ -282,6 +184,21 @@
                 echo "<h2 class='username'>$username</h2>";
 
                 echo "<div class='button-container'>";
+                echo "<div class='share-container'>";
+    echo "<div class='action-button share' id='shareButton'>Share</div>";
+
+    echo "<div class='share-options' id='shareOptions'>";
+    echo "<div class='a2a_kit a2a_kit_size_32 a2a_default_style'>";
+    echo "<a class='a2a_dd' href='https://www.addtoany.com/share'></a>";
+    echo "<a class='a2a_button_facebook' href='https://www.facebook.com/sharer/sharer.php?u=" . urlencode("https://yourdomain.com/post_details.php?post_id=$postID") . "'></a>";
+    echo "<a class='a2a_button_facebook_messenger' href='https://www.facebook.com/dialog/send?link=" . urlencode("https://yourdomain.com/post_details.php?post_id=$postID") . "'></a>";
+    echo "<a class='a2a_button_linkedin' href='https://www.linkedin.com/shareArticle?url=" . urlencode("https://yourdomain.com/post_details.php?post_id=$postID") . "'></a>";
+    echo "<a class='a2a_button_whatsapp' href='whatsapp://send?text=" . urlencode("Check out this post: https://yourdomain.com/post_details.php?post_id=$postID") . "'></a>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+
+                echo '<script async src="https://static.addtoany.com/menu/page.js"></script>';
                 echo "<button onclick=\"" . confirmDeleteScript($postID) . "\" class='action-button'>Delete</button>";
                 echo "<button onclick=\"" . showEditFormScript($postID) . "\" class='action-button'>Edit</button>";
 
@@ -508,6 +425,21 @@
         function showEditForm(postID) {
             window.location.href = `post_details.php?edit=${postID}`;
         }
+        // Select the share options container
+        var shareOptions = document.getElementById('shareOptions');
+
+        // Add event listener to show share options after clicking the share button
+        document.getElementById('shareButton').addEventListener('click', function () {
+            // Toggle the display of share options
+            shareOptions.style.display = (shareOptions.style.display === 'block') ? 'none' : 'block';
+        });
+
+        // Add event listener to hide share options when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!shareOptions.contains(event.target) && event.target !== document.getElementById('shareButton')) {
+                shareOptions.style.display = 'none';
+            }
+        });
     </script>
 
 

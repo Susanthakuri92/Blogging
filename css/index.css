@@ -1,0 +1,90 @@
+@import url('styles.css');
+
+input[type="text"],
+textarea {
+  width: 30vw;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  display: flex;
+  padding: 10px 15px;
+  background-color: rgba(0, 0, 0, 0);
+  /* Transparent black */
+  color: #000;
+  /* Black text */
+  border: 1px solid #000;
+  /* Black border */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+  /* Semi-transparent black on hover */
+  color: black;
+  /* White text on hover */
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+main a {
+  text-decoration: none;
+}
+
+.post {
+  width: calc(32% - 20px);
+  margin: 20px 0;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Add a subtle box shadow */
+  transition: transform 0.3s ease;
+}
+
+.post:hover {
+  transform: scale(1.05);
+}
+
+.post-content {
+  padding: 10px;
+}
+
+.love-section {
+  display: flex;
+  align-items: center;
+}
+
+.love-button {
+  cursor: pointer;
+}
+
+.love-count {
+  margin-left: 5px;
+}
+.search-form {
+  margin-top: 10px; /* Adjust as needed */
+}
+
+.search-container {
+  display: flex;
+  margin: 0 0 9px 30px;
+  
+}
+
