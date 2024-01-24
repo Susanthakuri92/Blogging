@@ -15,11 +15,8 @@
     .button {
       padding: 10px 15px;
       background-color: rgba(0, 0, 0, 0);
-      /* Transparent black */
       color: #000;
-      /* Black text */
       border: 1px solid #000;
-      /* Black border */
       border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease, color 0.3s ease;
@@ -27,9 +24,7 @@
 
     .button:hover {
       background-color: rgba(0, 0, 0, 0.2);
-      /* Semi-transparent black on hover */
       color: black;
-      /* White text on hover */
     }
   </style>
 </head>
@@ -58,7 +53,6 @@
     <section class="post">
       <div class="profile-info">
         <?php
-        // Your database connection code
         error_reporting(E_ALL);
         ini_set('display_errors', 1);
         session_start();
@@ -70,7 +64,6 @@
 
         $user_id = $_SESSION["user_id"];
 
-        // Fetch user details from the database using a prepared statement
         $sql = "SELECT * FROM users WHERE user_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $user_id);
@@ -89,7 +82,6 @@
           $profile_image = $row["profile_image"];
 
           echo '<div class="profile-details">';
-          // Display the user profile information
           echo '<h3>Username: ' . $username . '</h3>';
           echo '<p>Email: ' . $email . '</p>';
 
@@ -101,13 +93,10 @@
           echo '</div>';
           echo '</div>';
 
-          // Display profile image container on the right
           echo '<div class="profile-image-container">';
           if (isset($profile_image) && !empty($profile_image) && file_exists($profile_image)) {
-            // Existing profile image is present
             echo '<img src="' . $profile_image . '" alt="Profile Image" class="profile-image" onclick="document.getElementById(\'image\').click();">';
           } else {
-            // Use the default profile image if $profile_image is empty
             echo '<img src="uploads/default_profile.jpg" alt="Default Profile Image" class="profile-image" onclick="document.getElementById(\'image\').click();">';
           }
           echo '<form action="profile.php" method="post" enctype="multipart/form-data" id="imageForm">';
@@ -122,34 +111,28 @@
 
         $stmt->close();
 
-        // Handle image upload
         if (isset($_FILES['image'])) {
           $target_dir = "uploads/";
           $target_file = $target_dir . basename($_FILES["image"]["name"]);
           $uploadOk = 1;
           $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-          // Check if file already exists
           if (file_exists($target_file)) {
-            // Modify the file name to avoid conflicts
             $filename = pathinfo($target_file, PATHINFO_FILENAME);
             $extension = pathinfo($target_file, PATHINFO_EXTENSION);
             $timestamp = time();
             $target_file = $target_dir . $filename . '_' . $timestamp . '.' . $extension;
           }
 
-          // Check if $uploadOk is set to 0 by an error
           if ($uploadOk == 0) {
             echo "Sorry, your file was not uploaded.";
           } else {
             if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-              // Update the user's profile image in the database
               $updateSql = "UPDATE users SET profile_image = ? WHERE user_id = ?";
               $updateStmt = $conn->prepare($updateSql);
               $updateStmt->bind_param("si", $target_file, $user_id);
 
               if ($updateStmt->execute()) {
-                // Successfully updated the profile image
                 header("Location: profile.php");
                 exit();
               } else {

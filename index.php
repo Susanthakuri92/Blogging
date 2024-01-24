@@ -7,28 +7,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="css/index.css">
 </head>
+
 <body>
   <header>
     <h1><a href="index.php" style="text-decoration: none; color: inherit;">My Blogging System</a></h1>
-    <!-- Add this inside the <body> tag -->
     <form method="get" class="search-form">
-  <div class="search-container">
-    <input type="text" name="query" id="search" placeholder="Search Post">
-    <button type="submit">Search</button>
-  </div>
-</form>
+      <div class="search-container">
+        <input type="text" name="query" id="search" placeholder="Search Post">
+        <button type="submit">Search</button>
+      </div>
+    </form>
     <nav>
       <ul>
         <li><a href="index.php">Home</a></li>
         <li><a href="create.php">Create Post</a></li>
         <!-- <li><a href="profile.php">Profile</a></li>
         <li><a href="login.php" id="login-link">Log In</a></li> -->
-        
         <?php
         session_start();
         if (isset($_SESSION["user_id"])) {
-          // Assuming you have the $profile_image variable available
-          // Initialize $profile_image based on the user's data from the database
+          // --------profile image--------------
           include 'connect.php';
 
           $user_id = $_SESSION["user_id"];
@@ -51,10 +49,10 @@
           $stmt->close();
           $conn->close();
 
-          // Display profile image if available, otherwise use a default image
+          // -------profile image else default image--------
           echo '<li><a href="profile.php"><img src="' . (isset($profile_image) ? $profile_image : 'uploads/default_profile.jpg') . '" alt="Profile Image" class="profile-image-nav"></a></li>';
         } else {
-          // Display login link if the user is not logged in
+          // -------login link if not logged in -------------
           echo '<li><a href="login.php" id="login-link">Log In</a></li>';
         }
         ?>
@@ -72,33 +70,29 @@
 
   <main>
     <?php
-    session_start(); // Start the session
+    session_start(); 
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
 
-    // Check if the user is not logged in
+    // ------check if login or not---------
+
     if (!isset($_SESSION["user_id"])) {
-      // Redirect to the login page
       header("Location: login.php");
       exit;
     }
 
-    // Include the database connection file
     include 'connect.php';
-    include 'comments.php'; // Make sure you have this file with necessary functions
-
-    // Handle Love Count Update
+    include 'comments.php'; 
+    
+    // ------love count update---------
     if (isset($_GET['love'])) {
       $lovePostID = $_GET['love'];
 
-      // Validate user permissions or any other checks before updating love count
-      // Use prepared statement to avoid SQL injection
       $sqlUpdateLove = "UPDATE posts SET love_count = love_count + 1 WHERE post_id = ?";
       $stmtUpdateLove = $conn->prepare($sqlUpdateLove);
       $stmtUpdateLove->bind_param("i", $lovePostID);
 
       if ($stmtUpdateLove->execute()) {
-        // Redirect back to the same page to update love count
         header("Location: {$_SERVER['PHP_SELF']}");
         exit();
       } else {
@@ -108,11 +102,9 @@
       $stmtUpdateLove->close();
     }
 
-    // Check if the search query is provided
     if (isset($_GET['query'])) {
       $query = $_GET['query'];
 
-      // Use the $query to search for posts in your database
       $sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id 
               WHERE content LIKE ? OR username LIKE ? ORDER BY posts.post_date DESC";
 
@@ -123,19 +115,15 @@
       $result = $stmt->get_result();
 
       if ($result->num_rows > 0) {
-        // Create an array to store unique post IDs
         $uniquePostIDs = [];
 
-        // Loop through each search result
         while ($row = $result->fetch_assoc()) {
           $postID = $row['post_id'];
 
-          // Skip if post ID is already displayed
           if (in_array($postID, $uniquePostIDs)) {
             continue;
           }
 
-          // Add post ID to the array
           $uniquePostIDs[] = $postID;
 
           $username = $row['username'];
@@ -143,39 +131,35 @@
           $postDate = $row['post_date'];
           $loveCount = $row['love_count'];
 
-          // Display search result content
           echo "<a href='post_details.php?post_id=$postID' class='post-link'>";
 
           echo "<section class='post'>";
           echo "<div class='post-header'>";
-          echo "<h2 class='username'>$username</h2>"; // Display username
-          echo "</div>"; // Close the post-header div
-
+          echo "<h2 class='username'>$username</h2>"; 
+          echo "</div>"; 
+    
           echo "<p class='meta'>Posted on $postDate</p>";
-echo "<div class='post-content'>";
-echo "<p id='limitedText'>$content</p>";
-echo "</div>";
+          echo "<div class='post-content'>";
+          echo "<p id='limitedText'>$content</p>";
+          echo "</div>";
 
-          // Display the image if it exists
           if (!empty($row['image_path'])) {
             $imagePath = htmlspecialchars($row['image_path']);
-            $timestamp = time(); // Add timestamp to the image URL
-
-            // Echo the image path for debugging
+            $timestamp = time(); 
+    
             echo "<div style='width: 100%; height: 400px; overflow: hidden;'>";
             echo "<img src='{$imagePath}?t={$timestamp}' alt='Post Image' class='fill-container'>";
             echo "</div>";
           }
 
-          // Display the Love button and love count to the right of content
           echo "<div class='love-section' style='display: flex; align-items: center;'>";
           echo "<a href='javascript:void(0);' onclick='updateLoveCount($postID)' class='love-button'><i class='fa-regular fa-heart'></i></a>";
           echo "<span class='love-count' id='love-count-$postID'>$loveCount</span>";
           echo "</div>";
 
-          echo "</div>"; // Close the post-content div
-
-          echo "</section>"; // Close the section
+          echo "</div>";
+    
+          echo "</section>";
           echo "</a>";
         }
       } else {
@@ -184,95 +168,87 @@ echo "</div>";
 
       $stmt->close();
     } else {
-      // Fetch posts from the database with the associated username
-$sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id ORDER BY posts.post_date DESC";
-$result = $conn->query($sql);
+      $sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id ORDER BY posts.post_date DESC";
+      $result = $conn->query($sql);
 
-$uniquePostIDs = []; // Initialize the variable here
+      $uniquePostIDs = []; 
+    
+      if ($result === false) {
+        echo "Error: " . $conn->error;
+      } elseif ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+          $postID = $row['post_id'];
 
-if ($result === false) {
-    echo "Error: " . $conn->error;
-} elseif ($result->num_rows > 0) {
-    // Loop through each post
-    while ($row = $result->fetch_assoc()) {
-        $postID = $row['post_id'];
-
-        // Skip if post ID is already displayed
-        if (in_array($postID, $uniquePostIDs)) {
+          if (in_array($postID, $uniquePostIDs)) {
             continue;
-        }
+          }
 
-        // Add post ID to the array
-        $uniquePostIDs[] = $postID;
+          $uniquePostIDs[] = $postID;
 
-        $username = $row['username'];
-        $content = $row['content'];
-        $postDate = $row['post_date'];
-        $loveCount = $row['love_count'];
+          $username = $row['username'];
+          $content = $row['content'];
+          $postDate = $row['post_date'];
+          $loveCount = $row['love_count'];
 
-        echo "<a href='post_details.php?post_id=$postID' class='post-link'>";
-        
-        echo "<section class='post'>";
-        echo "<div class='post-header'>";
-        echo "<h2 class='username'>$username</h2>"; // Display username
-        echo "</div>"; // Close the post-header div
+          echo "<a href='post_details.php?post_id=$postID' class='post-link'>";
 
-        echo "<p class='meta'>Posted on $postDate</p>";
-        echo "<div class='post-content'>";
-        echo "<p class='limitedText'>$content</p>";
+          echo "<section class='post'>";
+          echo "<div class='post-header'>";
+          echo "<h2 class='username'>$username</h2>"; 
+          echo "</div>"; 
+    
+          echo "<p class='meta'>Posted on $postDate</p>";
+          echo "<div class='post-content'>";
+          echo "<p class='limitedText'>$content</p>";
 
-        // Display the image if it exists
-        if (!empty($row['image_path'])) {
+          if (!empty($row['image_path'])) {
             $imagePath = htmlspecialchars($row['image_path']);
-            $timestamp = time(); // Add timestamp to the image URL
-
-            // Echo the image path for debugging
+            $timestamp = time(); 
+    
             echo "<div style='width: 100%; height: 400px; overflow: hidden;'>";
             echo "<img src='{$imagePath}?t={$timestamp}' alt='Post Image' class='fill-container'>";
             echo "</div>";
+          }
+
+          echo "<div class='love-section' style='display: flex; align-items: center;'>";
+          echo "<a href='javascript:void(0);' onclick='updateLoveCount($postID)' class='love-button'><i class='fa-regular fa-heart'></i></a>";
+          echo "<span class='love-count' id='love-count-$postID'>$loveCount</span>";
+          echo "</div>";
+
+          echo "</div>";
+    
+          echo "</section>";
+          echo "</a>";
         }
-
-        // Display the Love button and love count to the right of content
-        echo "<div class='love-section' style='display: flex; align-items: center;'>";
-        echo "<a href='javascript:void(0);' onclick='updateLoveCount($postID)' class='love-button'><i class='fa-regular fa-heart'></i></a>";
-        echo "<span class='love-count' id='love-count-$postID'>$loveCount</span>";
-        echo "</div>";
-
-        echo "</div>"; // Close the post-content div
-
-        echo "</section>"; // Close the section
-        echo "</a>";
+      } else {
+        echo "No posts found.";
+      }
     }
-} else {
-    echo "No posts found.";
-}
-    }
-// Close the database connection
-$conn->close();
-?>
+    $conn->close();
+    ?>
   </main>
 
   <footer>
     <p>&copy; 2023 My Blogging System. All rights reserved.</p>
   </footer>
   <script>
-  function updateLoveCount(postID) {
-    window.location.href = '?love=' + postID;
-  }
+    function updateLoveCount(postID) {
+      window.location.href = '?love=' + postID;
+    }
 
-  document.addEventListener("DOMContentLoaded", function() {
-    var contentParagraphs = document.querySelectorAll(".limitedText");
-    var maxHeight = 36; // Adjust this value based on the desired height
+    document.addEventListener("DOMContentLoaded", function () {
+      var contentParagraphs = document.querySelectorAll(".limitedText");
+      var maxHeight = 36; 
 
-    contentParagraphs.forEach(function(contentParagraph) {
-      if (contentParagraph.clientHeight > maxHeight) {
-        contentParagraph.style.overflow = 'hidden';
-        contentParagraph.style.height = maxHeight + 'px';
-        contentParagraph.style.lineHeight = '1.2em'; // Adjust line-height if needed
-      }
+      contentParagraphs.forEach(function (contentParagraph) {
+        if (contentParagraph.clientHeight > maxHeight) {
+          contentParagraph.style.overflow = 'hidden';
+          contentParagraph.style.height = maxHeight + 'px';
+          contentParagraph.style.lineHeight = '1.2em'; 
+        }
+      });
     });
-  });
-</script>
+  </script>
 
 </body>
 

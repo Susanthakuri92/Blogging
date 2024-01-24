@@ -22,8 +22,6 @@
                 <?php
         session_start();
         if (isset($_SESSION["user_id"])) {
-          // Assuming you have the $profile_image variable available
-          // Initialize $profile_image based on the user's data from the database
           include 'connect.php';
 
           $user_id = $_SESSION["user_id"];
@@ -45,11 +43,8 @@
 
           $stmt->close();
           $conn->close();
-
-          // Display profile image if available, otherwise use a default image
           echo '<li><a href="profile.php"><img src="' . (isset($profile_image) ? $profile_image : 'uploads/default_profile.jpg') . '" alt="Profile Image" class="profile-image-nav"></a></li>';
         } else {
-          // Display login link if the user is not logged in
           echo '<li><a href="login.php" id="login-link">Log In</a></li>';
         }
         ?>
@@ -98,12 +93,9 @@
         {
             return "window.location.href = `post_details.php?edit={$postID}`;";
         }
-
-        // Check if the delete parameter is set
         if (isset($_GET['delete'])) {
             $deletePostID = $_GET['post_id'];
 
-            // Fetch the post from the database to get the image path
             $sqlSelect = "SELECT image_path FROM posts WHERE post_id = ?";
             $stmtSelect = $conn->prepare($sqlSelect);
             $stmtSelect->bind_param("i", $deletePostID);
@@ -114,17 +106,14 @@
                 $rowSelect = $resultSelect->fetch_assoc();
                 $imagePathToDelete = $rowSelect['image_path'];
 
-                // Delete the post from the database
                 $sqlDelete = "DELETE FROM posts WHERE post_id = ?";
                 $stmtDelete = $conn->prepare($sqlDelete);
                 $stmtDelete->bind_param("i", $deletePostID);
 
                 if ($stmtDelete->execute()) {
-                    // Remove the associated image file
-                    if (!empty($imagePathToDelete) && file_exists($imagePathToDelete)) {
+                                        if (!empty($imagePathToDelete) && file_exists($imagePathToDelete)) {
                         unlink($imagePathToDelete);
                     }
-                    // Redirect back to the post listing after deletion
                     echo "<script>window.location.href = 'index.php';</script>";
                     die();
                 } else {
@@ -139,22 +128,17 @@
             $stmtSelect->close();
         }
 
-        // Check if the post ID is provided
         if (isset($_GET['post_id'])) {
             $postID = $_GET['post_id'];
 
-            // Check if the love parameter is set
             if (isset($_GET['love'])) {
                 $lovePostID = $_GET['love'];
 
-                // Validate user permissions or any other checks before updating love count
-                // Use prepared statement to avoid SQL injection
                 $sqlUpdateLove = "UPDATE posts SET love_count = love_count + 1 WHERE post_id = ?";
                 $stmtUpdateLove = $conn->prepare($sqlUpdateLove);
                 $stmtUpdateLove->bind_param("i", $lovePostID);
 
                 if ($stmtUpdateLove->execute()) {
-                    // Redirect back to the post details page
                     echo "<script>window.location.href = 'post_details.php?post_id={$postID}';</script>";
                     die();
                 } else {
@@ -164,14 +148,12 @@
                 $stmtUpdateLove->close();
             }
 
-            // Fetch the post from the database
             $sql = "SELECT posts.*, users.username FROM posts JOIN users ON posts.user_id = users.user_id WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $postID);
             $stmt->execute();
             $result = $stmt->get_result();
 
-            // Check if the post exists
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $username = $row['username'];
@@ -219,7 +201,7 @@
                 echo "<span class='love-count'>$loveCount</span>";
                 echo "</div>";
 
-                $comments = getComments($postID); // Assuming this function fetches comments
+                $comments = getComments($postID); 
         
                 if (!empty($comments)) {
                     echo "<div class='comment-form-container'>";
@@ -253,38 +235,31 @@
             }
         }
 
-        // Display the edit form if the edit button is clicked
         if (isset($_GET['edit'])) {
             $postID = $_GET['edit'];
 
-            // Fetch the post from the database
             $sql = "SELECT * FROM posts WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $postID);
             $stmt->execute();
             $result = $stmt->get_result();
 
-            // Check if the post exists
             if ($result->num_rows > 0) {
-                // Display the edit form
                 $row = $result->fetch_assoc();
                 $content = $row['content'];
 
                 echo "<h2>Edit Post</h2>";
                 echo "<section class='post'>";
 
-                // Display the edit form with pre-filled values
                 echo "<form action='' method='post' enctype='multipart/form-data'>";
                 echo "<input type='hidden' name='post_id' value='{$postID}'>";
                 echo "<label>Content:</label><br>";
                 echo "<textarea name='content'>{$content}</textarea><br>";
 
-                // Display the current image
                 if (!empty($row['image_path'])) {
                     echo "<img src='" . escape($row['image_path']) . "' alt='Current Post Image' class='fill-container'><br>";
                 }
 
-                // Input for uploading a new image
                 echo "<label for='new_image'>Upload a New Image:</label>";
                 echo "<input type='file' name='new_image'><br>";
 
@@ -298,29 +273,21 @@
                 echo "Post not found.";
             }
 
-            // Close the statement
             $stmt->close();
         }
 
-        // Check if the form is submitted for editing a post
         if (isset($_POST['edit_post'])) {
             $postID = $_POST['post_id'];
             $content = $_POST['content'];
 
-            // Update the post in the database
             $sql = "UPDATE posts SET content = ?, image_path = ? WHERE post_id = ?";
             $stmt = $conn->prepare($sql);
 
-            // Check if a new image is uploaded
             $newImagePath = handleImageUpload($postID);
 
-            // Always bind both parameters but adjust SQL query accordingly
             if (!empty($newImagePath)) {
-                // If a new image is uploaded
                 $stmt->bind_param("ssi", $content, $newImagePath, $postID);
             } else {
-                // If no new image, bind parameters without image path
-                // Fetch the existing image path from the database
                 $sqlImagePath = "SELECT image_path FROM posts WHERE post_id = ?";
                 $stmtImagePath = $conn->prepare($sqlImagePath);
                 $stmtImagePath->bind_param("i", $postID);
@@ -331,7 +298,6 @@
                     $rowImagePath = $resultImagePath->fetch_assoc();
                     $existingImagePath = $rowImagePath['image_path'];
 
-                    // Bind parameters without image path
                     $stmt->bind_param("ssi", $content, $existingImagePath, $postID);
                 } else {
                     echo "Error fetching existing image path.";
@@ -341,25 +307,18 @@
                 $stmtImagePath->close();
             }
 
-            // Execute the statement
             if ($stmt->execute()) {
-                // Redirect back to the post details page
                 echo "<script>window.location.href = 'post_details.php?post_id={$postID}';</script>";
                 die();
             } else {
                 echo "Error updating post: " . $stmt->error;
             }
 
-            // Close the statement
             $stmt->close();
         }
 
-
-
-        // Close the database connection
         $conn->close();
 
-        // Function to handle image upload
         function handleImageUpload($postID)
         {
             $targetDir = "uploads/";
@@ -367,23 +326,19 @@
             $uploadOk = 1;
             $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 
-            // Check if a file is selected for upload
             if (empty($_FILES["new_image"]["tmp_name"])) {
                 echo "No new image selected. ";
                 return "";
             }
 
-            // Check file size
             if ($_FILES["new_image"]["size"] > 500000) {
                 echo "Sorry, your file is too large.";
                 $uploadOk = 0;
             }
 
-            // Check if $uploadOk is set to 0 by an error
             if ($uploadOk == 0) {
                 echo "Sorry, your file was not uploaded.";
             } else {
-                // If everything is ok, try to upload the file
                 if (move_uploaded_file($_FILES["new_image"]["tmp_name"], $targetFile)) {
                     echo "The file " . basename($_FILES["new_image"]["name"]) . " has been uploaded.";
                     return $targetFile;
@@ -406,10 +361,8 @@
         }
 
         function handleCommentSubmit(postID) {
-            // Implement your logic for handling comment submission here if needed
-            // Redirect to the current page after form submission
             window.location.href = `post_details.php?post_id=${postID}`;
-            return true; // Prevent form submission (you can remove this line if you want the form to submit)
+            return true; 
         }
 
         function handleAction(action, postID) {
@@ -425,16 +378,12 @@
         function showEditForm(postID) {
             window.location.href = `post_details.php?edit=${postID}`;
         }
-        // Select the share options container
         var shareOptions = document.getElementById('shareOptions');
 
-        // Add event listener to show share options after clicking the share button
         document.getElementById('shareButton').addEventListener('click', function () {
-            // Toggle the display of share options
             shareOptions.style.display = (shareOptions.style.display === 'block') ? 'none' : 'block';
         });
 
-        // Add event listener to hide share options when clicking outside
         document.addEventListener('click', function (event) {
             if (!shareOptions.contains(event.target) && event.target !== document.getElementById('shareButton')) {
                 shareOptions.style.display = 'none';

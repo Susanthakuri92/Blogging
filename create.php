@@ -4,30 +4,22 @@ error_reporting(E_ALL);
 
 session_start();
 
-// Include the database connection file
 include 'connect.php';
 
-// Check if the user is not logged in
 if (!isset($_SESSION["user_id"])) {
-    // Redirect to the login page
     header("Location: login.php");
     exit;
 }
 
-// Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the form data
-    $content = trim($_POST['content']); // Trim whitespace from the content
+    $content = trim($_POST['content']); 
 
-    // Check if the content is empty
     if (empty($content)) {
         die("Please enter content for your post.");
     }
 
-    // Handle image upload
     $target_dir = "uploads/";
 
-    // Ensure the target directory exists
     if (!file_exists($target_dir)) {
         mkdir($target_dir, 0777, true);
     }
@@ -36,74 +28,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploadOk = 1;
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-    // Get the MIME type using getimagesize
 $imageInfo = @getimagesize($_FILES["image"]["tmp_name"]);
 
-// Check if the file is an image
 if ($imageInfo === false) {
     die("File is not a valid image.");
 }
 
-// Check file size
 if ($_FILES["image"]["size"] > 500000) {
     die("Sorry, your file is too large.");
 }
 
-// Allow certain file formats
 $allowedFormats = ["jpg", "jpeg", "png", "gif"];
 if (!in_array($imageFileType, $allowedFormats)) {
     die("Sorry, only JPG, JPEG, PNG & GIF files are allowed.");
 }
 
-// Check if $uploadOk is set to 0 by an error
 if ($uploadOk == 0) {
     die("Sorry, your file was not uploaded.");
 } else {
     if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
         echo "The file " . htmlspecialchars(basename($_FILES["image"]["name"])) . " has been uploaded.";
 
-        // Prepare the SQL statement
         $sql = "INSERT INTO posts (user_id, content, image_path, post_date) VALUES (?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
 
-        // Bind the parameters and execute the statement
         $stmt->execute([$_SESSION["user_id"], $content, $target_file]);
 
-        // Check if the insertion was successful
         if ($stmt->affected_rows > 0) {
-            // Successful insertion, redirect to the index page
-            header('Location: /index.php');
+            header('Location: index.php');
             exit();
         } else {
-            // Log detailed error information
             error_log("Error saving post: " . $stmt->error);
 
-            // Inform the user about the error
             die("Error saving post. Please try again later.");
         }
     } else {
-        // Print detailed error information
         die("Sorry, there was an error uploading your file.<br>Error details: " . $_FILES["image"]["error"]);
     }
 }
 }
 
-// Close the database connection
 $conn->close();
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <!-- ... (your existing head content) ... -->
-</head>
-
-<body>
-    <!-- ... (your existing body content) ... -->
-</body>
-
-</html>
-
 
 <!DOCTYPE html>
 <html lang="en">

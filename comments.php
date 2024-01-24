@@ -28,12 +28,10 @@ if (isset($_POST['submitComment'])) {
     $commentText = trim($_POST['comment']);
 
     if (!empty($commentText)) {
-        // Replace the following lines with your authentication logic to get the user ID
         session_start();
         if (isset($_SESSION['user_id'])) {
             $userID = $_SESSION['user_id'];
         } else {
-            // Redirect to the login page if the user is not authenticated
             header("Location: login.php");
             exit;
         }
@@ -44,12 +42,9 @@ if (isset($_POST['submitComment'])) {
             header("Location: post_details.php?post_id=$postID");
             exit;
         } else {
-            // Provide a user-friendly error message
             echo "<p>Failed to add comment. Please try again later.</p>";
         }
     } else {
-        // Provide a user-friendly error message
         echo "<p>Please enter a comment.</p>";
     }
 }
-?>

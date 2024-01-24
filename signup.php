@@ -18,8 +18,6 @@
         <?php
         session_start();
         if (isset($_SESSION["user_id"])) {
-          // Assuming you have the $profile_image variable available
-          // Initialize $profile_image based on the user's data from the database
           include 'connect.php';
 
           $user_id = $_SESSION["user_id"];
@@ -42,10 +40,8 @@
           $stmt->close();
           $conn->close();
 
-          // Display profile image if available, otherwise use a default image
           echo '<li><a href="profile.php"><img src="' . (isset($profile_image) ? $profile_image : 'uploads/default_profile.jpg') . '" alt="Profile Image" class="profile-image-nav"></a></li>';
         } else {
-          // Display login link if the user is not logged in
           echo '<li><a href="login.php" id="login-link">Log In</a></li>';
         }
         ?>
@@ -84,7 +80,7 @@
       </div>
     </form>
 
-    <p>Already have an account? <a href="login.html">Log in</a></p>
+    <p>Already have an account? <a href="login.php">Log in</a></p>
   </div>
 
   <footer>
@@ -101,16 +97,12 @@
       $password = $_POST["password"];
       $confirmPassword = $_POST["confirm_password"];
 
-      // Perform necessary validation checks
       if ($password !== $confirmPassword) {
           echo "Passwords do not match.";
           exit;
       }
-
-      // Hash the password
       $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-      // Perform database query
       $sql = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("sss", $username, $email, $hashed_password);
