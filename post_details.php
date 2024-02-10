@@ -347,7 +347,7 @@
                     return "";
                 }
             }
-        }
+        }                                                                                            
         ?>
     </main>
     <footer>
